@@ -2,21 +2,15 @@
 
 بعد ان انتهينا من إنشاء مشروع NFT يمكننا تشغيله على موقعنا من اجل ان يتمكن المستخدم من التفاعل معه.
 
-سنقوم بإستخدام منصة <a href="https://floatui.com/" target="_blank">FloatUI</a> من اجل الحصول على بعض المكونات التي ستساعدنا في بناء واجهة امامية باستخدام Reactjs و TailwindCSS بكل سهولة.
+في هذا الدرس سنقوم بإستخدام إطار العمل Next.js و TailwindCSS من اجل بناء واجهة الموقع.
 
-سنقوم في هذا الدرس بإستخدام إطار العمل Nextjs وحزمة create-web3-dapp والتي هي إطار عمل قائم على NextJs ومتوافق مع سلاسل الكتل الأكثر استخدامًا بما في ذلك Ethereum والتي تساعد مطوري web3 على بناء تطبيق لامركزي جاهز للإنتاج بسرعة البرق باستخدام قوالب تم بنائها سابقاً: إذهب الى مجلد المشروع وقم بكتابة هذا في terminal
+قم بتشغيل هذا الامر في المجلد **my-app** الذي قمنا بإنشائه سابقاً من اجل إنشاء مشروع nextjs
 
 ```bash
-npx create-web3-dapp@latest
+npx create-next-app@latest .
 ```
 
-اسم المشروع my-app وسنقوم بإعداد المشروع كما موضح في الصورة هنا:
-
-<img src="https://www.web3arabs.com/courses/cw3d-settings.png"/>
-
-> في الخطوة السابعة تم إضافة API Key الذي قمنا بإستخدامه في درس <a href="/courses/253cff7d-f8ee-4a42-8e2f-d865d2589393/lessons/4b4058b6-37cf-4893-b4ff-2cc613fa3716" target="_blank">إنشاء مشروع NFT بإستخدام IPFS</a>
-
-يمكنك تثبيت إطار العمل TailwindCSS من خلال فتح مجلد my-app في terminal <a href="https://tailwindcss.com/docs/guides/nextjs" target="_blank">ومتابعة هذا الشرح المتواجد في وثائق Tailwind</a>
+<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/create-nextjs.png"/>
 
 سنحتاج الان الى تثبيت ethers.js والتي ستساعدنا في التعامل مع العقد الذكي وإرسال المعاملات. قم بكتابة هذا على terminal
 
@@ -24,82 +18,82 @@ npx create-web3-dapp@latest
 npm install ethers@5
 ```
 
-من اجل إضافة شبكة sepolia الى التطبيق سنقوم بالذهاب الى مجلد app ثم الملف layout.jsx وجعله بهذا الشكل
+ستذهب الى مجلد styles وستقوم بفتح الملف **globals.css** وستبقي هذه الاوامر في الملف
 
-```jsx
-"use client";
-import { WagmiConfig, createConfig, sepolia } from "wagmi";
-import { ConnectKitProvider, getDefaultConfig } from "connectkit";
-import Navbar from "../components/instructionsComponent/navigation/navbar";
-import Footer from "../components/instructionsComponent/navigation/footer";
-
-const chains = [sepolia]
-
-const config = createConfig(
-	getDefaultConfig({
-		// Required API Keys
-		alchemyId: process.env.ALCHEMY_API_KEY, // or infuraId
-		walletConnectProjectId: "demo",
-
-		// Required
-		appName: "You Create Web3 Dapp",
-
-		// Optional
-		appDescription: "Your App Description",
-		appUrl: "https://family.co", // your app's url
-		appIcon: "https://family.co/logo.png", // your app's logo,no bigger than 1024x1024px (max. 1MB)
-		chains: chains
-	})
-);
-
-export default function RootLayout({ children }) {
-	return (
-		<html lang="en">
-			<WagmiConfig config={config}>
-				<ConnectKitProvider mode="dark">
-					<body>
-						<div
-							style={{
-								display: "flex",
-								flexDirection: "column",
-								minHeight: "105vh",
-							}}
-						>
-							<Navbar />
-							<div style={{ flexGrow: 1 }}>{children}</div>
-							<Footer />
-						</div>
-					</body>
-				</ConnectKitProvider>
-			</WagmiConfig>
-		</html>
-	);
-}
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 ```
 
-الان اذهب الى المجلد app ثم الملف page.jsx وقم بلصق هذا الكود ومتابعة الشرح من التعليقات المتواجدة اعلى كل سطر.
+<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/globals-css.png"/>
+
+الان اذهب الى الملف index.js وقم بلصق هذا الكود ومتابعة الشرح من التعليقات المتواجدة اعلى كل سطر.
 
 ```jsx
-'use client'
-import "./globals.css";
 import { useState, useEffect } from "react"
-import { useAccount } from "wagmi"
 import { ethers } from "ethers"
-import abi from "../utils/W3ArabsProject.json"
+import abi from "../../contract-tutorial/artifacts/contracts/W3ArabsNFT.sol/W3ArabsNFT.json"
 
 export default function Home() {
   // Contract Address & ABI
   const contractAddress = "add_your_smart_contract_address_here"
   const contractABI = abi.abi
 
-  // المتصل بالموقع address بمراقبة حالة التطبيق ما إذا كان متصل بالمحفظة او لا... بالإضافة الى  useAccount ستقوم
-  const { address, connector, isConnected } = useAccount()
+  // ستقوم بتخزين عنوان المحفظة التي ستتصل بالتطبيق من اجل مراقبة ما اذا كانت المحفظة متصلة بالتطبيق او نتمكن من استدعاء عنوان المحفظة المتصلة
+  const [currentAccount, setCurrentAccount] = useState("")
   // المقبوضة NFTs تخزين اجمالي عدد
   const [tokenIds, setTokenIds] = useState("0")
   // مالك العقد الذكي address تخزين
   const [owner, setOwner] = useState("")
   // التي يمتلكها الموقع NFTs تخزين اجمالي عدد
   const [balance, setBalance] = useState("0")
+
+  // تعمل هذه الوظيفة على مراقبة اتصال المحفظة بالتطبيق بشكل مستمر
+  const isConnectWallet = async () => {
+    try {
+      // يتم استخدام هذا للوصول إلى كائن اثيريوم والتي من تعد من الكائنات العامة
+      const { ethereum } = window
+
+      // يقوم هذا بإرجاع مجموعة من عناوين شبكة اثيريوم المرتبطة بحساب المستخدم ويمكن استخدام هذا للوصول إلى حسابات المستخدم اثيريوم والتفاعل مع شبكة اثيريوم
+      const accounts = await ethereum.request({method: "eth_requestAccounts"})
+      console.log("accounts: ", accounts)
+      setCurrentAccount(accounts[0])
+
+      /**
+        يتحقق هذا الرمز من وجود أي حسابات متاحة في المحفظة الخاصة باللمستخدم.
+        إذا كان هناك، فإنه يقوم بتعيين الحساب الأول إلى متغير يسمى ويطبع رسالة في وحدة التحكم.
+        إذا لم تكن هناك حسابات متاح، فإنها تطبع رسالة في وحدة التحكم.
+      */
+      if (accounts.length > 0) {
+        const account = accounts[0]
+        console.log("wallet is connected! ", account)
+      } else {
+        console.log("make sure MetaMask is connected")
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // تعمل هذه الوظيفة على اتصال المحفظة بالتطبيق
+  const connectWallet = async () => {
+    try {
+      // يتم استخدام هذا للوصول إلى كائن اثيريوم والتي من تعد من الكائنات العامة
+      const { ethereum } = window
+
+      // يتحقق هذا لمعرفة ما إذا كان موفر شبكة اثيريوم متوفراً. إذا لم يكن متوفراً, فسيخرج رسالة
+      if (!ethereum) {
+        console.log("please install MetaMask")
+      }
+
+      // يقوم هذا بإرجاع مجموعة من عناوين شبكة اثيريوم المرتبطة بحساب المستخدم ويمكن استخدام هذا للوصول إلى حسابات المستخدم اثيريوم والتفاعل مع شبكة اثيريوم
+      const accounts = await ethereum.request({method: "eth_requestAccounts"})
+      setCurrentAccount(accounts[0])
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   // للمستخدم NFT يقوم بسك 1
   const mint = async () => {
@@ -223,6 +217,7 @@ export default function Home() {
   // تمثل المصفوفة في نهاية استدعاء الوظيفة ما هي تغييرات الحالة التي ستؤدي إلى هذا التغيير
   // في هذه الحالة كلما تغيرت قيم الوظيفتين سيتم استدعاء هذا التغيير مباشرة
   useEffect(() => {
+    isConnectWallet()
     getTokenIdsAndOwner()
     getBalance()
 
@@ -237,7 +232,7 @@ export default function Home() {
     <div dir="rtl">
       <p className='text-center italic text-3xl text-rose-700 font-bold mt-10'>W3Arabs Project</p>
       {
-        isConnected ? (
+        currentAccount ? (
           <div>
             <p className='text-center text-xl text-rose-700 font-bold mt-10'>مجموع NFTs المقبوضة: {tokenIds}</p>
             <p className='text-center text-xl text-rose-700 font-bold mt-10'>مجموع NFTs الخاصة بك: {balance}</p>
@@ -245,7 +240,7 @@ export default function Home() {
               <button onClick={mint} className="px-4 mr-8 mt-5 py-2 text-white bg-rose-600 rounded-lg duration-150 hover:bg-rose-700 active:shadow-lg">احصل على واحدة</button>
             </div>
 
-            {owner==address.toLowerCase() && (
+            {owner==currentAccount && (
               <div className="flex justify-center">
                 <button onClick={withdraw} className="px-4 mr-8 mt-5 py-2 text-white bg-rose-600 rounded-lg duration-150 hover:bg-rose-700 active:shadow-lg">سحب قيمة NFTs</button>
               </div>
@@ -262,27 +257,28 @@ export default function Home() {
 }
 ```
 
+<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/indexjs.png"/>
+
 يعمل الكود السابق بإختصار شديد على تشغيل العقد الذكي او المشروع الذي قمنا ببناء عقده (Todo-list) في الواجهة الامامية بحيث يتمكن المستخدم من ربط محفظته واضافة المهام وتحديثها وازالتها.
 
-```jsx
+```javascript
 // Contract Address & ABI
 const contractAddress = "add_your_smart_contract_address_here"
 const contractABI = abi.abi
 ```
 
-لقد قمنا أولاً بإضافة عنوان العقد الذكي الخاص بنا الذي قمنا بنشره على شبكة sepolia في المتغير (contractAddress) ومن ثم قمنا بإضافة ABI العقد في المجلد (utils) وقمنا باستدعائه في المتغير (contractABI).
-
-يمكنك الحصول على ABI الخاص بعقدك الذكي من خلال فتح تطبيق "hardhat" وفتح المجلد "artifacts" ومن ثم فتح المجلد "contracts" و "Todolist.sol" وثم بنسخ الملف "Todolist.json" الى المجلد "utils" الذي قمنا بإنشائه (يمكننا فحص هذا الملف جيداً وكل ماهو مهم بالنسبة لك هو "abi" الخاص بالعقد الذكي الذي ستتعامل معه).
+لقد قمنا أولاً بإضافة عنوان العقد الذكي الخاص بنا الذي قمنا بنشره على شبكة sepolia في المتغير (**contractAddress**) ومن ثم قمنا بإستدعاء ABI العقد المتواجد في مشروع Hardhat وقمنا باستدعائه في المتغير (**contractABI**).
 
 يمكنك تجربة تطبيقك الان
 
 ```bash
 npm run dev
 ```
-إذهب الى <a href="http://localhost:3000" target="_blank">localhost:3000</a> وقم بالإتصال بالتطبيق من خلال محفظتك وقم بإضافة بعض المهام
 
-<img src="https://www.web3arabs.com/courses/result-cw3d-nft.png" alt="NFT Project"/>
+<img src="https://www.web3arabs.com/courses/result-front-nft.png" alt="NFT Project"/>
 
 إنه يعمل, لقد انتهيت من بناء مشروع NFT بنجاح 🥳🥳
 
-كما هو الحال دائمًا، إذا كانت لديك أي أسئلة أو شعرت بالتعثر أو أردت فقط أن تقول مرحبًا، فقم بالإنضمام على <a href="https://t.me/Web3ArabsDAO" target="_blank">Telegram</a> او <a href="https://discord.gg/ykgUvqMc4Q" target="_blank">Discord</a> وسنكون أكثر من سعداء لمساعدتك!
+يمكنك الوصول الى المشروع بشكل مباشر على <a href="https://github.com/Web3Arabs/W3ArabsNFT" target="_blank"> GitHub من هنا</a>
+
+كما هو الحال دائمًا، إذا كانت لديك أي أسئلة أو شعرت بالتعثر أو أردت فقط أن تقول مرحبًا، فقم بالإنضمام على <a href="https://discord.gg/ykgUvqMc4Q" target="_blank">Discord</a> وسنكون أكثر من سعداء لمساعدتك!
