@@ -19,9 +19,7 @@ mkdir W3ArabsNFT & cd W3ArabsNFT
 mkdir contract-tutorial & mkdir my-app
 ```
 
-<div dir="ltr" className="flex justify-center items-center">
 <img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/settingup-project.png"/>
-</div>
 
 - في المجلد **contract-tutorial** سنقوم بإعداد ونشر العقد الذكي.
 - في المجلد **my-app** سنقوم ببناء الواجهة الامامية للمشروع وربطها بالعقد الذكي في الدروس القادمة.
@@ -59,6 +57,7 @@ npx hardhat
 <img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/npx-hardhat.png"/>
 
 #### سنلاحظ ان التطبيق يحتوي على 3 مجلدات رئيسية وهي:
+
 1. contracts: الذي سنقوم من خلاله بكتابة العقود الذكية.
 2. scripts: والذي سنقوم من خلاله بالتعامل مع العقود الذكية او رفعها على الشبكات.
 3. test: والذي سنقوم من خلاله بإجراء اختبارات لعقدنا الذكي.
@@ -262,23 +261,37 @@ main()
 
 <img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/deploy-contract.png"/>
 
-الان ستحتاج الى مزود عقدة يتيح لك الاتصال بالعديد من سلاسل الكتل المختلفة. يمكنك استخدام <a href="https://alchemy.com/" target="_blank">Alchemy</a> كمزود للعقد الخاصة بك بكل سهولة.
+الان ستحتاج الى مزود عقدة يتيح لك الاتصال بالعديد من سلاسل الكتل المختلفة. يمكنك استخدام <a href="https://www.quicknode.com/?utm_source=web3-arabs" target="_blank">**QuickNode**</a> كمزود للعقد الخاصة بك بكل سهولة.
 
-قم بإنشاء حساب في منصة <a href="https://auth.alchemy.com/signup?redirectUrl=https%3A%2F%2Fdashboard.alchemy.com%2Fsignup%2F" target="_blank">Alchemy</a> وإذا كان لديك حساب بالفعل قم <a href="https://auth.alchemy.com/?redirectUrl=https%3A%2F%2Fdashboard.alchemy.com%2Fsignup%2F" target="_blank">بتسجيل الدخول مباشرة</a> ومن ثم الإتجاه نحو لوحة التحكم هذه:
+قم <a href="https://www.quicknode.com/?utm_source=web3-arabs" target="_blank">**بإنشاء حساب على QuickNode**</a> من خلال النقر على **Create account** وإذا كان لديك حساب بالفعل قم بتسجيل الدخول مباشرة  من خلال النقر على **Sign in**.
 
-<img src="https://www.web3arabs.com/courses/alchemy-dashboard.png"/>
+<img src="https://www.web3arabs.com/courses/quicknode-home.png"/>
 
-قم بالنقر على (Create new app) وقم بكتابة اسم لتطبيقك وتحديد شبكة (Sepolia) ومن ثم النقر على (Create app)
+بمجرد تسجيل الدخول سيتقم نقلك إلى لوحة التحكم هذه:
 
-<img src="https://www.web3arabs.com/courses/alchemy-build.png" alt="Alchemy build"/>
+<img src="https://www.web3arabs.com/courses/quicknode-dashboard.png"/>
 
-بعد  إنشاء التطبيق سيظهر لك هذه الصفحة قم بالنقر على **VIEW KEY**
+سنقوم بالذهاب الى قسم **Endpoints** من خلال القسم الايسر ومن ثم النقر على الزر **Create Endpoint** من اجل إنشاء مزود عُقدة
 
-<img src="https://www.web3arabs.com/courses/alchemy-view-key.png"/>
+<img src="https://www.web3arabs.com/courses/quicknode-endpoints.png"/>
 
-يمكنك نسخ رابط المفتاح (HTTPS) الخاص بك:
+**سنقوم بإنشاء **Endpoints** بهذه الطريقة:**
 
-<img src="https://www.web3arabs.com/courses/alchemy-keys.png" alt="Alchemy keys"/>
+1- سنقوم بإستخدام سلسلة **Ethereum** فلذلك سنقوم بتحديدها هكذا والنقر على الزر **Continue**:
+
+<img src="https://www.web3arabs.com/courses/quicknode-select-chain.png"/>
+
+2- بما ان الغرض من الدرس هو التعلم فلذلك سنقوم بتحديد شبكة الإختبار **Sepolia** والنقر على الزر **Continue**:
+
+<img src="https://www.web3arabs.com/courses/quicknode-select-network.png"/>
+
+3- سنقوم بالنقر على الزر **Create Endpoint** لإنشاء المزود:
+
+<img src="https://www.web3arabs.com/courses/quicknode-create.png"/>
+
+4- أخيراً - ستقوم بنسخ **HTTP Provider** لأننا سنحتاجه لاحقاً من اجل نشر عقدنا الذكي على شبكة **Sepolia**
+
+<img src="https://www.web3arabs.com/courses/quicknode-keys.png"/>
 
 ستقوم الان بنسخ **Private Key** الخاص بمحفظتك المشفرة عن طريق:
 
@@ -291,7 +304,7 @@ main()
 قم بإضافة كل ما قمت بنسخه في ملف (env.)
 
 ```js
-ALCHEMY_HTTPS_URL="add-alchemy-http-url-here"
+QUICKNODE_HTTP_PROVIDER="add-quicknode-http-url-here"
 
 PRIVATE_KEY="add-private-key-here"
 ```
@@ -302,21 +315,19 @@ PRIVATE_KEY="add-private-key-here"
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config({ path: ".env" });
 
-const ALCHEMY_HTTPS_URL = process.env.ALCHEMY_HTTPS_URL;
+const QUICKNODE_HTTP_PROVIDER = process.env.QUICKNODE_HTTP_PROVIDER;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
   solidity: "0.8.19",
   networks: {
     sepolia: {
-      url: ALCHEMY_HTTPS_URL,
+      url: QUICKNODE_HTTP_PROVIDER,
       accounts: [PRIVATE_KEY],
     },
   },
 }
 ```
-
-<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/hardhat-config.png"/>
 
 قم بتجميع العقد الذكي الخاص بك الان. تأكد من انك في مسار تطبيقك (contract-tutorial) وقم بتشغيل هذا الامر
 
@@ -324,7 +335,7 @@ module.exports = {
 npx hardhat compile
 ```
 
-**ملاحظة**: يمكن الحصول على بعض العملات التي تساعدك في اختبار ونشر تطبيقاتك على شبكة **Sepolia** من <a href="https://sepoliafaucet.com/" target="_blank">**Alchemy Faucet**</a>
+**ملاحظة**: يمكن الحصول على بعض العملات التي تساعدك في اختبار ونشر تطبيقاتك على شبكة **Sepolia** من <a href="https://www.infura.io/faucet/sepolia" target="_blank">**Infura Faucet**</a> - ستقوم بإنشاء حساب على **Infura** ستقوم بوضع عنوان **address** الخاص بك وستحصل على بعض من العملات.
 
 حان وقت نشر عقدك الذكي :) قم بكتابة هذا الامر
 
