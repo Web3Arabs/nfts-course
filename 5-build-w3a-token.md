@@ -59,6 +59,8 @@ contract W3ACoin is ERC20 {
 
 <img src="https://www.web3arabs.com/courses/remix-deploy.png" alt="Remix Deploy"/>
 
+**ملاحظة**: يمكنك الحصول على بعض العملات التي تساعدك في اختبار ونشر تطبيقاتك على شبكة **Sepolia** من <a href="https://www.web3arabs.com/faucets/sepolia" target="_blank">**صنبور Web3Arabs هنا**</a> - قم بتوصيل محفظتك بالصنبور وإنقر على الزر **إرسال**.
+
 ### طريقة إظهار الرمز على MetaMask
 
 - تأكد أولاً انك على شبكة Sepolia
