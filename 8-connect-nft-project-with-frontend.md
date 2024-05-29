@@ -18,7 +18,7 @@ npx create-next-app@latest .
 npm install ethers@5
 ```
 
-ستذهب الى مجلد styles وستقوم بفتح الملف **globals.css** وستبقي هذه الاوامر في الملف
+ستذهب الى مجلد app وستقوم بفتح الملف **globals.css** وستبقي هذه الاوامر في الملف
 
 ```css
 @tailwind base;
@@ -28,12 +28,14 @@ npm install ethers@5
 
 <img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/globals-css.png"/>
 
-الان اذهب الى الملف index.js وقم بلصق هذا الكود ومتابعة الشرح من التعليقات المتواجدة اعلى كل سطر.
+الان اذهب الى الملف **page.js** في المجلد **app** وقم بلصق هذا الكود ومتابعة الشرح من التعليقات المتواجدة اعلى كل سطر.
+
 
 ```jsx
+"use client"
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
-import abi from "../../contract-tutorial/artifacts/contracts/W3ArabsNFT.sol/W3ArabsNFT.json"
+import abi from "../../contract-tutorial/out/W3ArabsNFT.sol/W3ArabsNFT.json"
 
 export default function Home() {
   // Contract Address & ABI
@@ -113,10 +115,22 @@ export default function Home() {
           signer
         )
 
+        // جلب سعر الغاز الحالي
+        const gasPrices = (await provider.getGasPrice()).toString()
+
         // NFT من العقد الذكي وإعطاء قيمة mint استدعاء الدالة
-        const w3arabsTxn = await w3arabs.mint({
-          value: ethers.utils.parseEther("0.01"),
-        })
+        const w3arabsTxn = await w3arabs.mint(
+          // NFT عنوان المحفظة الذي سيحصل على
+          currentAccount,
+          {
+            // NFT تحديد قيمة
+            value: ethers.utils.parseEther("0.01"),
+            // حد الغاز الذي يجب إستخدامه
+            gasLimit: "3000000",
+            // سعر الغاز الحالي الذي يجب إستخدامه في المعامله
+            gasPrice: ethers.utils.formatUnits(gasPrices, "wei")
+          }
+        )
         await w3arabsTxn.wait()
 
         window.alert("You successfully minted a W3ArabsProject!")
@@ -202,7 +216,8 @@ export default function Home() {
           signer
         )
 
-        const w3arabsTxn = await w3arabs.withdraw()
+        // owner - سحب الاموال من العقد الذكي إلى مالك العقد
+        const w3arabsTxn = await w3arabs.withdraw(owner)
         await w3arabsTxn.wait()
 
         window.alert("You successfully withdraw a W3ArabsProject!")
@@ -255,9 +270,10 @@ export default function Home() {
     </div>
   )
 }
+
 ```
 
-<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/indexjs.png"/>
+<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/indexjs.png">
 
 يعمل الكود السابق بإختصار شديد على تشغيل العقد الذكي او المشروع الذي قمنا ببناء عقده (Todo-list) في الواجهة الامامية بحيث يتمكن المستخدم من ربط محفظته واضافة المهام وتحديثها وازالتها.
 
@@ -267,7 +283,8 @@ const contractAddress = "add_your_smart_contract_address_here"
 const contractABI = abi.abi
 ```
 
-لقد قمنا أولاً بإضافة عنوان العقد الذكي الخاص بنا الذي قمنا بنشره على شبكة sepolia في المتغير (**contractAddress**) ومن ثم قمنا بإستدعاء ABI العقد المتواجد في مشروع Hardhat وقمنا باستدعائه في المتغير (**contractABI**).
+لقد قمنا أولاً بإضافة عنوان العقد الذكي الخاص بنا الذي قمنا بنشره على شبكة sepolia في المتغير (contractAddress) ومن ثم قمنا بإستدعاء ABI العقد المتواجد في مشروع Foundry في المجلد out وقمنا باستدعائه في المتغير (contractABI).
+
 
 يمكنك تجربة تطبيقك الان
 
