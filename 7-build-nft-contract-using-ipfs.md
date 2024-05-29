@@ -40,90 +40,99 @@ mkdir contract-tutorial & mkdir my-app
 
 سنستخدم احد الادوات التي ستساعدنا في التعامل مع العقود الذكية وهي Hardhat. يعتبر Hardhat هي بيئة وإطار تطوير شبكة Ethereum مصمم للتعامل بشكل كامل مع لغة Solidity.
 
-سنقوم بفتح المجلد **contract-tutorial** على terminal ونقوم بإضافة هذه الاوامر
+يمكنك إعداد وتثبيت أداة Foundry <a href="/blogs/what-is-foundry" target="_blank">في جهازك بواسطة أحد المقالات لدينا من هنا</a>
+
+سنقوم بحذف الملفات التلقائية بالمشروع التي لا نحتاجها عن طريق تشغيل هذا الأمر:
+
+
 
 ```bash
-cd contract-tutorial
-npm init --yes
-npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox@2 @openzeppelin/contracts dotenv
+rm src/Counter.sol script/Counter.s.sol test/Counter.t.sol
+
 ```
 
-سنقوم الان بتشغيل تطبيق Hardhat
+ستقوم بتثبيت OpenZeppelin في المشروع عن طريق تشغيل هذا الأمر:
+
 
 ```bash
-npx hardhat
+forge install openzeppelin/openzeppelin-contracts --no-commit
 ```
+يمكنك الان فتح مشروعك على محرر الاكواد الخاص بك.
 
-<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/npx-hardhat.png"/>
 
-#### سنلاحظ ان التطبيق يحتوي على 3 مجلدات رئيسية وهي:
+#### سنلاحظ ان التطبيق يحتوي على 4 مجلدات رئيسية وهي:
 
-1. contracts: الذي سنقوم من خلاله بكتابة العقود الذكية.
-2. scripts: والذي سنقوم من خلاله بالتعامل مع العقود الذكية او رفعها على الشبكات.
-3. test: والذي سنقوم من خلاله بإجراء اختبارات لعقدنا الذكي.
+1.lib: يحتوي على المُشغل الاساسي للمشروع بالكامل ولن نقوم بالتعديل عليه على الإطلاق.
+2.script: والذي سنقوم من خلاله بالتعامل مع العقود الذكية او رفعها على الشبكات.
+3.src: الذي سنقوم من خلاله بكتابة العقود الذكية.
+4.test: والذي سنقوم من خلاله بإجراء اختبارات لعقدنا الذكي.
 
-يمكنك الان البدء في إنشاء عقدك الذكي. قم بإنشاء ملف في مجلد contracts بإسم W3ArabsNFT.sol
+
+يمكنك الان البدء في إنشاء عقدك الذكي. قم بإنشاء ملف بإسم W3ArabsNFT.sol في مجلد src:
+
 
 ```solidity
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract W3ArabsNFT is ERC721Enumerable, Ownable {
-  // parameters إلى سلاسل عند تمريرها كمعلمات uint256 يشير إلى أنه سيتم تحويل قيم
-  using Strings for uint256;
+contract W3ArabsNFT is ERC721URIStorage, Ownable {
+    // parameters إلى سلاسل عند تمريرها كمعلمات uint256 يشير إلى أنه سيتم تحويل قيم
+    using Strings for uint256;
 
-  // لكل رمز مميز URI يتم استخدام هذا المتغير لتخزين
-  string _tokenURI;
+    // لكل رمز مميز URI يتم استخدام هذا المتغير لتخزين
+    string _tokenURI;
 
-  // 0.01 يقوم بتخصيص قيمة للرمز المميز وهي
-  uint256 public _price = 0.01 ether;
+    // 0.01 يقوم بتخصيص قيمة للرمز المميز وهي
+    uint256 public _price = 0.01 ether;
 
-  // إجمالي عدد الرموز المميزة التي تم قبضها
-  uint256 public tokenIds;
+    // إجمالي عدد الرموز المميزة التي تم قبضها
+    uint256 public tokenIds;
 
-  /**
-  * لتحديد اسم ورمز لمشروعنا ERC721 يُستخدم
-  * _tokenURI الخاص بمشروعنا في المتغير baseURI يتم تمرير
-  */
-  constructor (string memory baseURI) ERC721("W3ArabsNFT", "W3AN") {
-    _tokenURI = baseURI;
-  }
+    /**
+    * لتحديد اسم ورمز لمشروعنا ERC721 يُستخدم
+    * _tokenURI الخاص بمشروعنا في المتغير baseURI يتم تمرير
+    */
+    constructor (string memory baseURI, address initialOwner) 
+        ERC721("W3ArabsNFT", "W3AN") 
+        Ownable(initialOwner)
+    {
+        _tokenURI = baseURI;
+    }
 
-  // NFT تسمح هذه الدالة للمستخدم بقبض 1
-  function mint() public payable {
-    // يجب ان يمتلك المستخدم ايثير بقيمة اكثر من او يساوي 0.01
-    require(msg.value >= _price, "You have not a ether");
-    // NFT في كل مرة يقوم المستخدم بسك tokenIds يقوم بزيادة
-    tokenIds += 1;
-    _safeMint(msg.sender, tokenIds);
-  }
+    // NFT تسمح هذه الدالة للمستخدم بقبض 1
+    function mint(address recipient) public payable {
+        // يجب ان يمتلك المستخدم ايثير بقيمة اكثر من او يساوي 0.01
+        require(msg.value >= _price, "You have not a ether");
+        // NFT في كل مرة يقوم المستخدم بسك tokenIds يقوم بزيادة
+        tokenIds += 1;
+        _safeMint(recipient, tokenIds);
+    }
 
-  function _baseURI() internal view virtual override returns (string memory) {
-    return _tokenURI;
-  }
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _tokenURI;
+    }
 
-  function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-    _requireMinted(tokenId);
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        require(tokenId <= tokenIds);
 
-    string memory baseURI = _baseURI();
-    return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI)) : "";
-  }
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI)) : "";
+    }
 
-  function withdraw() public onlyOwner {
-    address _owner = owner();
-    uint256 amount = address(this).balance;
-    (bool sent, ) =  _owner.call{value: amount}("");
-    require(sent, "Error to send Ether");
-  }
+    function withdraw(address recipient) public onlyOwner {
+        uint256 amount = address(this).balance;
+        (bool sent, ) =  recipient.call{value: amount}("");
+        require(sent, "Error to send Ether");
+    }
 
-  receive() external payable {}
+    receive() external payable {}
 
-  fallback() external payable {}
+    fallback() external payable {}
 }
+
 ```
 
 <img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/w3arabsnft-contract.png"/>
@@ -228,35 +237,35 @@ fallback() external payable {}
 ### نشر العقد الذكي
 
 يمكنك الان رفع عقدك الذكي بكل سهولة. سنقوم باستخدام شبكة الاختبارات وهي sepolia.
-اذهب الى المجلد scripts وقم بإنشاء ملف بإسم deploy.js (في حال هناك ملف بنفس الاسم قم بإزالة الاكواد التي فيه وإجعله بهذا الشكل):
+سنقوم بنشر العقد الذكي بطريقة مختلفة قليلاً عن السابق. قم بإنشاء ملف بإسم W3ArabsNFT.s.sol في المجلد script:
 
-```javascript
-const hre = require("hardhat");
 
-async function main() {
-  /**
-    لنشر عقود ذكية جديدة getContractFactory يستخدم
-  */
-  const w3arabsContract = await hre.ethers.getContractFactory("W3ArabsNFT");
+```solidity
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.24;
 
-  // Pinata التي قمنا برفعها على metadata البيانات الوصفية CID هنا نقوم برفع العقد وندخل
-  const w3arabs = await w3arabsContract.deploy(
-    "https://copper-colonial-lamprey-141.mypinata.cloud/ipfs/add_your_ipfs_cid"
-  );
+import "forge-std/Script.sol";
+import "../src/W3ArabsNFT.sol";
 
-  // انتظر حتى تنتهي عملية الرفع
-  await w3arabs.deployed();
+contract W3ArabsScript is Script {
+    W3ArabsNFT w3arabs;
 
-  // طباعة عنوان العقد المنشور
-  console.log("W3ArabsProject deployed to:", w3arabs.address);
+    function setUp() public {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        w3arabs = new W3ArabsNFT(
+            "https://copper-colonial-lamprey-141.mypinata.cloud/ipfs/add_your_ipfs_cid", 
+            add_your_address
+        );
+
+        vm.stopBroadcast();
+    }
+
+    function run() public {
+    }
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
 ```
 
 <img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/deploy-contract.png"/>
@@ -293,8 +302,6 @@ main()
 
 <img src="https://www.web3arabs.com/courses/quicknode-keys.png"/>
 
-**ملاحظة**: في حال لم تتمكن من إستخدام <a href="https://www.quicknode.com/?utm_source=web3-arabs" target="_blank">**QuickNode**</a> يمكنك تجربة مُزود آخر مثل <a href="https://www.infura.io/" target="_blank">**Infura**</a> - كُل ما يهم هو الحصول على **HTTP Provider**.
-
 ستقوم الان بنسخ **Private Key** الخاص بمحفظتك المشفرة عن طريق:
 
 1. فتح المحفظة الخاصة بك ومن ثم النقر على الثلاث النقاط التي في الاعلى على اليمين.
@@ -310,47 +317,43 @@ QUICKNODE_HTTP_PROVIDER="add-quicknode-http-url-here"
 
 PRIVATE_KEY="add-private-key-here"
 ```
+<img src="/courses/nfts/w3arabsnft/env-pk.png">
 
-قم بفتح ملف hardhat.config.js وقم باستيراد المفاتيح المتواجدة في ملف env. وقم بإختيار الشبكة التي تريد استخدامها لرفع العقد الذكي الخاص بك ولكننا هنا سنستخدم شبكة sepolia فلذلك سنقوم بتحديدها
+في حال لم تقوم بإضافة المحفظة من قبل، ستقوم بإضافة معلومات محفظتك في جهازك عن طريق المفتاح الخاص (Private Key) الذي قمت بنسخه عن طريق تشغيل هذا الأمر:
 
-```javascript
-require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config({ path: ".env" });
+ستقوم أولاً بإضافة العنوان الخاص ومن ثم كلمة سر خاصه بك وتذكرها جيداً، لأن سيتم مطالبتك بها في كل مره تريد استخدام محفظتك في نشر عقد ذكي.
 
-const QUICKNODE_HTTP_PROVIDER = process.env.QUICKNODE_HTTP_PROVIDER;
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-
-module.exports = {
-  solidity: "0.8.19",
-  networks: {
-    sepolia: {
-      url: QUICKNODE_HTTP_PROVIDER,
-      accounts: [PRIVATE_KEY],
-    },
-  },
-}
 ```
+cast wallet import deployer --interactive
 
-قم بتجميع العقد الذكي الخاص بك الان. تأكد من انك في مسار تطبيقك (contract-tutorial) وقم بتشغيل هذا الامر
-
-```bash
-npx hardhat compile
 ```
+ستقوم بالتأكيد عن طريق تشغيل هذا الأمر:
 
-**ملاحظة**: يمكنك الحصول على بعض العملات التي تساعدك في اختبار ونشر تطبيقاتك على شبكة **Sepolia** من <a href="https://www.web3arabs.com/faucets/sepolia" target="_blank">**صنبور Web3Arabs هنا**</a> - قم بتوصيل محفظتك بالصنبور وإنقر على الزر **إرسال**.
+```
+cast wallet list
 
-<img src="https://www.web3arabs.com/courses/faucet-sepolia.png"/>
+```
+قم بتجميع العقد الذكي الخاص بك الان. تأكد من انك في مسار تطبيقك (contract) وقم بتشغيل هذا الامر:
 
+```
+forge build
+```
+**ملاحظة**: يمكنك الحصول على بعض العملات التي تساعدك في اختبار ونشر تطبيقاتك على شبكة Sepolia من صنبور Web3Arabs هنا - قم بتوصيل محفظتك بالصنبور وإنقر على الزر إرسال.
+
+<img src="/courses/faucet-sepolia.png">
+
+الان ستقوم بتفعيل المتغير المتواجد في ملف .env في terminal من أجل إستخدامها في الخطوة القادمة:
+
+```
+source .env
+```
 حان وقت نشر عقدك الذكي :) قم بكتابة هذا الامر
 
-```bash
-npx hardhat run scripts/deploy.js --network sepolia
 ```
+forge script script/W3ArabsNFT.s.sol:W3ArabsScript —rpc-url $QUICKNODE_HTTP_PROVIDER --account deployer --broadcast
+```
+<img src="/courses/nfts/w3arabsnft/deployed-contract.png">
 
-<img src="https://www.web3arabs.com/courses/nfts/w3arabsnft/deployed-contract.png"/>
+قم بنسخ عنوان عقدك الذكي من أجل إجتياز الاختبار في الاسفل وحفظه حتى نتمكن من استخدامه اثناء جعله يعمل في الواجهة الامامية.
 
-<br/>
-
-قم بحفظ عنوان عقدك الذكي حتى نتمكن من استخدامه اثناء جعله يعمل في الواجهة الامامية.
-
-كما هو الحال دائمًا، إذا كانت لديك أي أسئلة أو شعرت بالتعثر أو أردت فقط أن تقول مرحبًا، فقم بالإنضمام على <a href="https://t.me/Web3ArabsDAO" target="_blank">Telegram</a> او <a href="https://discord.gg/ykgUvqMc4Q" target="_blank">Discord</a> وسنكون أكثر من سعداء لمساعدتك!
+كما هو الحال دائمًا، إذا كانت لديك أي أسئلة أو شعرت بالتعثر أو أردت فقط أن تقول مرحبًا، فقم بالإنضمام على Telegram او Discord وسنكون أكثر من سعداء لمساعدتك!
